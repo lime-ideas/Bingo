@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <title>90s Bingo</title>
@@ -52,12 +53,9 @@
             margin-top: 20px;
             display: none;
         }
-        #cardLink {
-        color: blue;
-        text-decoration: underline; /* Optional: adds an underline */
-    }
     </style>
 </head>
+
 <body>
     <h1>90s Bingo Generator</h1>
     <button onclick="generateCardAndShow()">🎲 Get My Bingo Card</button>
@@ -67,7 +65,7 @@
         <button id="submitButton" onclick="redirectToForm()">Proceed to Submit Info</button>
     </div>
     <div id="cardLinkContainer" style="margin-top: 20px; display: none;">
-        <p>Here is a link to your generated card: <a id="cardLink" href="#"></a></p>
+        <p>Here is a link to your generated card: <a id="cardLink" href="#" style="color: blue; text-decoration: underline;"></a></p>
         <p><small>Bookmark this link to return to your card.</small></p>
     </div>
 
@@ -82,7 +80,7 @@
             "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
         ];
 
-        const googleFormId = '1FAIpQLSdjka319ssYitGdQfoViq7BINnPwXgFsX6JEUzbG5kVuYvHig'; // Replace with your actual Form ID
+       const googleFormId = '1FAIpQLSdjka319ssYitGdQfoViq7BINnPwXgFsX6JEUzbG5kVuYvHig'; // Replace with your actual Form ID
         const bingoWordsEntryId = 'entry.1510045328'; // Replace with your Bingo Words entry ID
 
         function shuffle(array) {
@@ -122,28 +120,16 @@
         }
 
         function generateCardAndShow() {
-    console.log("generateCardAndShow() called");
-    const cardWords = generateCard();
-    console.log("cardWords:", cardWords);
-    renderCard(cardWords);
-    const encoded = encodeURIComponent(JSON.stringify(cardWords));
-    window.location.hash = encoded;
-    console.log("window.location.hash:", window.location.hash);
-    const cardLinkContainer = document.getElementById("cardLinkContainer");
-    console.log("cardLinkContainer element:", cardLinkContainer);
-    cardLinkContainer.style.display = "block";
-    let cardLink = document.getElementById("cardLink");
-    console.log("cardLink element (before):", cardLink);
-    if (!cardLink) {
-        console.error("Error: cardLink element not found!");
-    } else {
-        cardLink.href = window.location.href;
-        cardLink.innerText = "Your Card Link";
-        console.log("cardLink.href set to:", cardLink.href);
-        console.log("cardLink.innerText set");
-        console.log("cardLink element (after):", cardLink);
-    }
-}
+            const cardWords = generateCard();
+            renderCard(cardWords);
+            const encoded = encodeURIComponent(JSON.stringify(cardWords));
+            window.location.hash = encoded;
+            document.getElementById("cardDisplay").style.display = "block";
+            document.getElementById("cardLinkContainer").style.display = "block";
+            const cardLink = document.getElementById("cardLink");
+            cardLink.href = window.location.href;
+            cardLink.innerText = "Your Card Link";
+        }
 
         function redirectToForm() {
             const cardWords = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
@@ -159,8 +145,9 @@
                     renderCard(selected);
                     document.getElementById("cardDisplay").style.display = "block";
                     document.getElementById("cardLinkContainer").style.display = "block";
-                    document.getElementById("cardLink").href = window.location.href;
-                    document.getElementById("cardLink").innerText = window.location.href;
+                    const cardLink = document.getElementById("cardLink");
+                    cardLink.href = window.location.href;
+                    cardLink.innerText = window.location.href;
                 }
             } catch {
                 // Error parsing hash
@@ -170,4 +157,5 @@
         window.onload = loadCardFromHash;
     </script>
 </body>
+
 </html>
