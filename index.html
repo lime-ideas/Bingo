@@ -4,17 +4,42 @@
     <meta charset="UTF-8" />
     <title>90s Bingo Cards</title>
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
+        @page {
+            size: landscape;
+            margin: 0;
         }
 
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .card-container {
+                display: flex;
+                flex-direction: column;
+                page-break-after: always;
+            }
+
+            .bingo-pair {
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                height: 100vh;
+                width: 100vw;
+                page-break-after: always;
+            }
+
+            .bingo-card {
+                transform: scale(0.95);
+                page-break-inside: avoid;
+            }
+        }
+
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
         .bingo-card {
@@ -42,13 +67,14 @@
 
         .bingo-title {
             font-weight: bold;
-            margin: 10px 0;
+            text-align: center;
             font-size: 18px;
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-    <div class="card-container" id="cardDisplay"></div>
+    <div id="cardDisplay"></div>
 
     <script>
         const phrases = [
@@ -74,7 +100,15 @@
             return shuffle(phrases).slice(0, 24);
         }
 
-        function renderCard(cardWords, container) {
+        function renderCard(cardWords) {
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("bingo-card");
+
+            const title = document.createElement("div");
+            title.classList.add("bingo-title");
+            title.innerHTML = "<strong>90s Bingo</strong>";
+            cardDiv.appendChild(title);
+
             const table = document.createElement("table");
             let index = 0;
             for (let row = 0; row < 5; row++) {
@@ -91,20 +125,22 @@
                 }
                 table.appendChild(tr);
             }
-            container.appendChild(table);
+
+            cardDiv.appendChild(table);
+            return cardDiv;
         }
 
         const cardDisplay = document.getElementById("cardDisplay");
-        for (let i = 0; i < 40; i++) {
-            const cardWords = generateCard();
-            const cardDiv = document.createElement("div");
-            cardDiv.classList.add("bingo-card");
-            const title = document.createElement("div");
-            title.classList.add("bingo-title");
-            title.innerHTML = "<strong>90s Bingo</strong>";
-            cardDiv.appendChild(title);
-            renderCard(cardWords, cardDiv);
-            cardDisplay.appendChild(cardDiv);
+        for (let i = 0; i < 40; i += 2) {
+            const pair = document.createElement("div");
+            pair.classList.add("bingo-pair");
+
+            const card1 = renderCard(generateCard());
+            const card2 = renderCard(generateCard());
+
+            pair.appendChild(card1);
+            pair.appendChild(card2);
+            cardDisplay.appendChild(pair);
         }
     </script>
 </body>
