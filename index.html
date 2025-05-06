@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8" />
-    <title>90s Bingo</title>
+    <title>90s Bingo Cards</title>
     <style>
         body {
             font-family: sans-serif;
@@ -11,54 +10,41 @@
             padding: 20px;
         }
 
-        table {
-            margin: auto;
-            border-collapse: collapse;
-        }
-
-        td {
-            width: 80px;
-            height: 80px;
-            border: 1px solid #333;
-            vertical-align: middle;
-            text-align: center;
-            cursor: pointer;
-            background: #fff;
-            user-select: none;
-            font-size: 12px;
-            padding: 5px;
-        }
-
-        td.marked {
-            background-color: lightgreen;
-            text-decoration: line-through;
-        }
-
-        #cardDisplay {
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             margin-top: 20px;
         }
 
-        #cardDisplay table {
-            margin: 10px auto;
+        .bingo-card {
+            margin: 10px;
+            border: 1px solid #333;
         }
 
-        #submitButton {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+        .bingo-card table {
+            border-collapse: collapse;
+        }
+
+        .bingo-card td {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #333;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 10px;
+            padding: 5px;
+        }
+
+        .bingo-card .free {
+            background-color: lightgray;
         }
     </style>
 </head>
-
 <body>
-    <h1>90s Bingo Generator</h1>
-    <button onclick="generateCardAndShow()">🎲 Get My Bingo Card</button>
-    <div id="cardDisplay" style="display: none;">
-        <h2>Your Bingo Card</h2>
-        <table id="bingo"></table>
-        <button id="submitButton" onclick="redirectToForm()">Proceed to Submit Info</button>
-    </div>
+    <h1>Four 90s Bingo Cards</h1>
+    <div class="card-container" id="cardDisplay">
+        </div>
 
     <script>
         const phrases = [
@@ -70,9 +56,6 @@
             "Pokémon", "Mini Backpacks", "Gak", "MTV", "Clarissa", "Daria", "Skorts", "TLC", "N64",
             "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
         ];
-
-        const googleFormId = '1FAIpQLSdjka319ssYitGdQfoViq7BINnPwXgFsX6JEUzbG5kVuYvHig'; // Replace with your actual Form ID
-        const bingoWordsEntryId = 'entry.1510045328'; // Replace with your Bingo Words entry ID
 
         function shuffle(array) {
             let a = [...array];
@@ -87,60 +70,37 @@
             return shuffle(phrases).slice(0, 24);
         }
 
-        function renderCard(selected) {
-            const table = document.getElementById("bingo");
-            table.innerHTML = "";
+        function renderCard(cardWords, container) {
+            const table = document.createElement("table");
             let index = 0;
-
             for (let row = 0; row < 5; row++) {
                 const tr = document.createElement("tr");
                 for (let col = 0; col < 5; col++) {
                     const td = document.createElement("td");
-
                     if (row === 2 && col === 2) {
                         td.innerText = "FREE";
-                        td.classList.add("marked");
+                        td.classList.add("free");
                     } else {
-                        td.innerText = selected[index];
-                        index++;
+                        td.innerText = cardWords[index++];
                     }
                     tr.appendChild(td);
                 }
                 table.appendChild(tr);
             }
+            container.appendChild(table);
         }
 
-        function generateCardAndShow() {
+        const cardDisplay = document.getElementById("cardDisplay");
+        for (let i = 0; i < 4; i++) {
             const cardWords = generateCard();
-            renderCard(cardWords);
-            const encoded = encodeURIComponent(JSON.stringify(cardWords));
-            window.location.hash = encoded;
-            document.getElementById("cardDisplay").style.display = "block";
-            // No need to show cardLinkContainer anymore
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("bingo-card");
+            const title = document.createElement("h3");
+            title.innerText = `Card ${i + 1}`;
+            cardDiv.appendChild(title);
+            renderCard(cardWords, cardDiv);
+            cardDisplay.appendChild(cardDiv);
         }
-
-        function redirectToForm() {
-            const cardWords = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
-            const prefilledUrl = `https://docs.google.com/forms/d/e/${googleFormId}/viewform?usp=pp_url&${bingoWordsEntryId}=${encodeURIComponent(cardWords.join(', '))}`;
-            window.location.href = prefilledUrl;
-        }
-
-        function loadCardFromHash() {
-            const hash = decodeURIComponent(location.hash.slice(1));
-            try {
-                const selected = JSON.parse(hash);
-                if (Array.isArray(selected) && selected.length === 24) {
-                    renderCard(selected);
-                    document.getElementById("cardDisplay").style.display = "block";
-                    // No need to show cardLinkContainer anymore
-                }
-            } catch {
-                // Error parsing hash
-            }
-        }
-
-        window.onload = loadCardFromHash;
     </script>
 </body>
-
 </html>
