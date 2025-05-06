@@ -17,16 +17,16 @@
         }
 
         td {
-            width: 80px;
-            height: 80px;
+            width: 80px; /* Adjusted width for better fit */
+            height: 80px; /* Adjusted height for better fit */
             border: 1px solid #333;
             vertical-align: middle;
             text-align: center;
             cursor: pointer;
             background: #fff;
             user-select: none;
-            font-size: 12px;
-            padding: 5px;
+            font-size: 12px; /* Adjusted font size */
+            padding: 5px; /* Added padding */
         }
 
         td.marked {
@@ -48,17 +48,25 @@
             font-size: 16px;
             cursor: pointer;
         }
+
+        #cardLinkContainer {
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 
 <body>
     <h1>90s Bingo Generator</h1>
     <button onclick="generateCardAndShow()">🎲 Get My Bingo Card</button>
-
     <div id="cardDisplay" style="display: none;">
         <h2>Your Bingo Card</h2>
         <table id="bingo"></table>
         <button id="submitButton" onclick="redirectToForm()">Proceed to Submit Info</button>
+    </div>
+    <div id="cardLinkContainer" style="margin-top: 20px; display: none;">
+        <p>Here is a link to your generated card: <a id="cardLink" href="#" style="color: blue; text-decoration: underline;"></a></p>
+        <p><small>Bookmark this link to return to your card.</small></p>
     </div>
 
     <script>
@@ -72,8 +80,8 @@
             "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
         ];
 
-        const googleFormId = '1FAIpQLSdjka319ssYitGdQfoViq7BINnPwXgFsX6JEUzbG5kVuYvHig'; // Replace with your actual Form ID
-        const bingoWordsEntryId = 'entry.1510045328'; // Replace with your Bingo Words entry ID
+        const googleFormId = 'YOUR_FORM_ID'; // Replace with your actual Form ID
+        const bingoWordsEntryId = 'entry.YOUR_ENTRY_ID'; // Replace with your Bingo Words entry ID
 
         function shuffle(array) {
             let a = [...array];
@@ -105,10 +113,6 @@
                         td.innerText = selected[index];
                         index++;
                     }
-                    td.addEventListener("click", () => {
-                        td.classList.toggle("marked");
-                    });
-
                     tr.appendChild(td);
                 }
                 table.appendChild(tr);
@@ -121,12 +125,16 @@
             const encoded = encodeURIComponent(JSON.stringify(cardWords));
             window.location.hash = encoded;
             document.getElementById("cardDisplay").style.display = "block";
+            document.getElementById("cardLinkContainer").style.display = "block";
+            const cardLink = document.getElementById("cardLink");
+            cardLink.href = window.location.href;
+            cardLink.innerText = "Your Card Link";
         }
 
         function redirectToForm() {
             const cardWords = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
             const prefilledUrl = `https://docs.google.com/forms/d/e/${googleFormId}/viewform?usp=pp_url&${bingoWordsEntryId}=${encodeURIComponent(cardWords.join(', '))}`;
-            window.open(prefilledUrl, '_blank');
+            window.location.href = prefilledUrl;
         }
 
         function loadCardFromHash() {
@@ -136,9 +144,13 @@
                 if (Array.isArray(selected) && selected.length === 24) {
                     renderCard(selected);
                     document.getElementById("cardDisplay").style.display = "block";
+                    document.getElementById("cardLinkContainer").style.display = "block";
+                    const cardLink = document.getElementById("cardLink");
+                    cardLink.href = window.location.href;
+                    cardLink.innerText = window.location.href;
                 }
             } catch {
-                // Ignore if hash isn't valid
+                // Error parsing hash
             }
         }
 
