@@ -32,11 +32,12 @@
             text-decoration: line-through;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
 </head>
 
 <body>
     <h1>90s Bingo Generator</h1>
+    <label for="nameInput">Enter Your Name:</label>
+    <input type="text" id="nameInput" placeholder="Your Name">
     <button onclick="generateNewCard()">🎲 Create New Card</button>
     <button onclick="copyCardLink()">📋 Copy My Card Link</button>
     <p><small>This card is saved in the URL. Bookmark or share this link!</small></p>
@@ -53,26 +54,22 @@
             "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
         ];
 
-        function generateSeededCard(seed) {
-            const seededRandom = new Math.seedrandom(seed);
-            function seededShuffle(array) {
-                let a = [...array];
-                for (let i = a.length - 1; i > 0; i--) {
-                    let j = Math.floor(seededRandom() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]];
-                }
-                return a;
+        function shuffle(array) {
+            let a = [...array];
+            for (let i = a.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
             }
-
-            const selected = seededShuffle(phrases).slice(0, 24);
-            const encoded = encodeURIComponent(JSON.stringify({ seed: seed, phrases: selected }));
-            window.location.hash = encoded;
-            renderCard(selected);
+            return a;
         }
 
         function generateNewCard() {
-            const seed = Math.random().toString(36).substring(2, 15);
-            generateSeededCard(seed);
+            const name = document.getElementById("nameInput").value;
+            const selected = shuffle(phrases).slice(0, 24);
+            const encoded = encodeURIComponent(JSON.stringify(selected));
+            window.location.hash = encoded;
+            renderCard(selected);
+            sendDataToGoogleSheet(name, selected);
         }
 
         function renderCard(selected) {
@@ -114,7 +111,6 @@
 
         function loadMarks() {
             const cells = document.querySelectorAll("#bingo td");
-            const hashData = JSON.parse(decodeURIComponent(location.hash.slice(1))); // Parse hash data
             const state = JSON.parse(localStorage.getItem(location.hash) || "[]");
             state.forEach((mark, i) => {
                 if (mark) cells[i].classList.add("marked");
@@ -124,9 +120,9 @@
         function loadFromHash() {
             const hash = decodeURIComponent(location.hash.slice(1));
             try {
-                const data = JSON.parse(hash);
-                if (data && Array.isArray(data.phrases) && data.phrases.length === 24 && data.seed) {
-                    generateSeededCard(data.seed); // Regenerate card from seed
+                const selected = JSON.parse(hash);
+                if (Array.isArray(selected) && selected.length === 24) {
+                    renderCard(selected);
                     loadMarks();
                 } else {
                     generateNewCard();
@@ -140,6 +136,20 @@
             navigator.clipboard.writeText(window.location.href).then(() => {
                 alert("Card link copied! Save or share it to return to your card.");
             });
+        }
+
+        function sendDataToGoogleSheet(name, words) {
+            const formId = "YOUR_GOOGLE_FORM_ID"; // Replace with your actual Form ID
+            const nameFieldId = "entry.XXXXXXX"; // Replace with your Form's 'Name' field entry ID
+            const wordsFieldId = "entry.YYYYYYY"; // Replace with your Form's 'Bingo Words' field entry ID
+
+            const formData = new URLSearchParams();
+            formData.append(nameFieldId, name);
+            formData.append(wordsFieldId, words.join(", "));
+
+            const formUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?${formData.toString()}`;
+
+            window.open(formUrl, '_blank');
         }
 
         window.onload = loadFromHash;
