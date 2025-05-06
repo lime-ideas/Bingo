@@ -128,12 +128,17 @@
     const cardLinkContainer = document.getElementById("cardLinkContainer");
     console.log("cardLinkContainer element:", cardLinkContainer);
     cardLinkContainer.style.display = "block";
-    const cardLink = document.getElementById("cardLink");
-    console.log("cardLink element:", cardLink);
-    cardLink.href = window.location.href;
-    cardLink.innerText = "Your Card Link";
-    console.log("cardLink.href set to:", cardLink.href);
-    console.log("cardLink.innerText set");
+    let cardLink = document.getElementById("cardLink");
+    console.log("cardLink element (before):", cardLink);
+    if (!cardLink) {
+        console.error("Error: cardLink element not found!");
+    } else {
+        cardLink.href = window.location.href;
+        cardLink.innerText = "Your Card Link";
+        console.log("cardLink.href set to:", cardLink.href);
+        console.log("cardLink.innerText set");
+        console.log("cardLink element (after):", cardLink);
+    }
 }
 
         function redirectToForm() {
