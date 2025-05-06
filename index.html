@@ -118,15 +118,23 @@
         }
 
         function generateCardAndShow() {
-            const cardWords = generateCard();
-            renderCard(cardWords);
-            const encoded = encodeURIComponent(JSON.stringify(cardWords));
-            window.location.hash = encoded;
-            document.getElementById("cardDisplay").style.display = "block";
-            document.getElementById("cardLinkContainer").style.display = "block";
-            document.getElementById("cardLink").href = window.location.href;
-            document.getElementById("cardLink").innerText = "Your Card Link";
-        }
+    console.log("generateCardAndShow() called");
+    const cardWords = generateCard();
+    console.log("cardWords:", cardWords);
+    renderCard(cardWords);
+    const encoded = encodeURIComponent(JSON.stringify(cardWords));
+    window.location.hash = encoded;
+    console.log("window.location.hash:", window.location.hash);
+    const cardLinkContainer = document.getElementById("cardLinkContainer");
+    console.log("cardLinkContainer element:", cardLinkContainer);
+    cardLinkContainer.style.display = "block";
+    const cardLink = document.getElementById("cardLink");
+    console.log("cardLink element:", cardLink);
+    cardLink.href = window.location.href;
+    cardLink.innerText = "Your Card Link";
+    console.log("cardLink.href set to:", cardLink.href);
+    console.log("cardLink.innerText set");
+}
 
         function redirectToForm() {
             const cardWords = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
