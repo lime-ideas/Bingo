@@ -43,6 +43,7 @@
         .bingo-title {
             font-weight: bold;
             margin: 10px 0;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -100,10 +101,11 @@
             cardDiv.classList.add("bingo-card");
             const title = document.createElement("div");
             title.classList.add("bingo-title");
-            title.innerText = "90s Bingo";
+            title.innerHTML = "<strong>90s Bingo</strong>";
             cardDiv.appendChild(title);
             renderCard(cardWords, cardDiv);
             cardDisplay.appendChild(cardDiv);
         }
     </script>
-</
+</body>
+</html>
