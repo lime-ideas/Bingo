@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8" />
     <title>90s Bingo</title>
@@ -33,15 +32,15 @@
         }
     </style>
 </head>
-
 <body>
     <h1>90s Bingo Generator</h1>
-    <label for="nameInput">Enter Your Name:</label>
-    <input type="text" id="nameInput" placeholder="Your Name">
-    <button onclick="generateNewCard()">🎲 Create New Card</button>
-    <button onclick="copyCardLink()">📋 Copy My Card Link</button>
-    <p><small>This card is saved in the URL. Bookmark or share this link!</small></p>
-    <table id="bingo"></table>
+    <button onclick="generateAndRedirect()">🎲 Get My Bingo Card</button>
+    <p><small>Click the button to get your personalized bingo card and submit your info.</small></p>
+    <table id="bingo" style="display: none;"></table>
+    <div id="cardLinkContainer" style="margin-top: 20px; display: none;">
+        <p>Here is your bingo card link: <a id="cardLink" href="#"></a></p>
+        <p><small>Bookmark this link to return to your card.</small></p>
+    </div>
 
     <script>
         const phrases = [
@@ -54,6 +53,9 @@
             "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
         ];
 
+        const googleFormId = 1FAIpQLSdjka319ssYitGdQfoViq7BINnPwXgFsX6JEUzbG5kVuYvHig; // Replace with your actual Form ID
+        const bingoWordsEntryId = entry.1510045328; // Replace with your Bingo Words entry ID
+
         function shuffle(array) {
             let a = [...array];
             for (let i = a.length - 1; i > 0; i--) {
@@ -63,13 +65,8 @@
             return a;
         }
 
-        function generateNewCard() {
-            const name = document.getElementById("nameInput").value;
-            const selected = shuffle(phrases).slice(0, 24);
-            const encoded = encodeURIComponent(JSON.stringify(selected));
-            window.location.hash = encoded;
-            renderCard(selected);
-            sendDataToGoogleSheet(name, selected);
+        function generateCard() {
+            return shuffle(phrases).slice(0, 24);
         }
 
         function renderCard(selected) {
@@ -99,61 +96,53 @@
                 }
                 table.appendChild(tr);
             }
-
-            saveMarks();
+            document.getElementById("bingo").style.display = "table";
         }
 
         function saveMarks() {
             const cells = document.querySelectorAll("#bingo td");
             const state = Array.from(cells).map(td => td.classList.contains("marked"));
-            localStorage.setItem(location.hash, JSON.stringify(state));
+            localStorage.setItem(getCardId(), JSON.stringify(state));
         }
 
         function loadMarks() {
             const cells = document.querySelectorAll("#bingo td");
-            const state = JSON.parse(localStorage.getItem(location.hash) || "[]");
+            const state = JSON.parse(localStorage.getItem(getCardId()) || "[]");
             state.forEach((mark, i) => {
                 if (mark) cells[i].classList.add("marked");
             });
         }
 
-        function loadFromHash() {
+        function getCardId() {
+            // Simple way to generate a unique ID for the card in local storage
+            return 'bingo_card_' + window.location.hash.substring(1);
+        }
+
+        function loadCardFromHash() {
             const hash = decodeURIComponent(location.hash.slice(1));
             try {
                 const selected = JSON.parse(hash);
                 if (Array.isArray(selected) && selected.length === 24) {
                     renderCard(selected);
                     loadMarks();
+                    document.getElementById("cardLinkContainer").style.display = "block";
+                    document.getElementById("cardLink").href = window.location.href;
+                    document.getElementById("cardLink").innerText = window.location.href;
                 } else {
-                    generateNewCard();
+                    // No valid card in hash, do nothing for now
                 }
             } catch {
-                generateNewCard();
+                // Error parsing hash, do nothing for now
             }
         }
 
-        function copyCardLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                alert("Card link copied! Save or share it to return to your card.");
-            });
+        function generateAndRedirect() {
+            const cardWords = generateCard();
+            const prefilledUrl = `https://docs.google.com/forms/d/e/<span class="math-inline">\{googleFormId\}/viewform?usp\=pp\_url&</span>{bingoWordsEntryId}=${encodeURIComponent(cardWords.join(', '))}`;
+            window.location.href = prefilledUrl;
         }
 
-        function sendDataToGoogleSheet(name, words) {
-            const formId = "YOUR_GOOGLE_FORM_ID"; // Replace with your actual Form ID
-            const nameFieldId = "entry.XXXXXXX"; // Replace with your Form's 'Name' field entry ID
-            const wordsFieldId = "entry.YYYYYYY"; // Replace with your Form's 'Bingo Words' field entry ID
-
-            const formData = new URLSearchParams();
-            formData.append(nameFieldId, name);
-            formData.append(wordsFieldId, words.join(", "));
-
-            const formUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?${formData.toString()}`;
-
-            window.open(formUrl, '_blank');
-        }
-
-        window.onload = loadFromHash;
+        window.onload = loadCardFromHash;
     </script>
 </body>
-
 </html>
