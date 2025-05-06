@@ -1,43 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>90s Bingo!</title>
+  <title>90s Bingo</title>
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #fefefe;
-    }
-    table {
-      margin: 0 auto;
-      border-collapse: collapse;
-    }
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    table { margin: auto; border-collapse: collapse; }
     td {
-      width: 100px;
-      height: 100px;
-      border: 2px solid #333;
-      vertical-align: middle;
-      text-align: center;
-      padding: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      background-color: white;
-      user-select: none;
+      width: 100px; height: 100px; border: 1px solid #333;
+      vertical-align: middle; text-align: center;
+      cursor: pointer; background: #fff; user-select: none;
     }
-    td.marked {
-      background-color: #90ee90;
-      text-decoration: line-through;
-    }
+    td.marked { background-color: lightgreen; text-decoration: line-through; }
   </style>
 </head>
 <body>
-
-<h1>90s Bingo!</h1>
-<button onclick="generateBingoCard()">🎲 New Card</button>
-<table id="bingo-board"></table>
+<h1>90s Bingo Generator</h1>
+<button onclick="generateNewCard()">🎲 Create New Card</button>
+<button onclick="copyCardLink()">📋 Copy My Card Link</button>
+<p><small>This card is saved in the URL. Bookmark or share this link!</small></p>
+<table id="bingo"></table>
 
 <script>
 const phrases = [
@@ -50,27 +32,32 @@ const phrases = [
   "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
 ];
 
-function shuffle(arr) {
-  let shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+function shuffle(array) {
+  let a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  return shuffled;
+  return a;
 }
 
-function generateBingoCard() {
-  localStorage.clear(); // Start fresh
-  const board = document.getElementById("bingo-board");
-  board.innerHTML = "";
-  let selected = shuffle(phrases).slice(0, 24);
+function generateNewCard() {
+  const selected = shuffle(phrases).slice(0, 24);
+  const encoded = encodeURIComponent(JSON.stringify(selected));
+  window.location.hash = encoded;
+  renderCard(selected);
+}
 
+function renderCard(selected) {
+  const table = document.getElementById("bingo");
+  table.innerHTML = "";
   let index = 0;
+
   for (let row = 0; row < 5; row++) {
     const tr = document.createElement("tr");
     for (let col = 0; col < 5; col++) {
       const td = document.createElement("td");
-      let cellIndex = row * 5 + col;
+
       if (row === 2 && col === 2) {
         td.innerText = "FREE";
         td.classList.add("marked");
@@ -79,58 +66,55 @@ function generateBingoCard() {
         index++;
       }
 
-      td.onclick = () => {
+      td.addEventListener("click", () => {
         td.classList.toggle("marked");
-        saveBoard();
-      };
+        saveMarks();
+      });
 
       tr.appendChild(td);
     }
-    board.appendChild(tr);
+    table.appendChild(tr);
   }
 
-  saveBoard(); // Save new board
+  saveMarks();
 }
 
-function saveBoard() {
-  const cells = document.querySelectorAll("#bingo-board td");
-  const state = Array.from(cells).map(td => ({
-    text: td.innerText,
-    marked: td.classList.contains("marked")
-  }));
-  localStorage.setItem("bingoState", JSON.stringify(state));
+function saveMarks() {
+  const cells = document.querySelectorAll("#bingo td");
+  const state = Array.from(cells).map(td => td.classList.contains("marked"));
+  localStorage.setItem(location.hash, JSON.stringify(state));
 }
 
-function loadBoard() {
-  const saved = localStorage.getItem("bingoState");
-  if (!saved) {
-    generateBingoCard();
-    return;
-  }
+function loadMarks() {
+  const cells = document.querySelectorAll("#bingo td");
+  const state = JSON.parse(localStorage.getItem(location.hash) || "[]");
+  state.forEach((mark, i) => {
+    if (mark) cells[i].classList.add("marked");
+  });
+}
 
-  const board = document.getElementById("bingo-board");
-  board.innerHTML = "";
-  const state = JSON.parse(saved);
-
-  for (let row = 0; row < 5; row++) {
-    const tr = document.createElement("tr");
-    for (let col = 0; col < 5; col++) {
-      const i = row * 5 + col;
-      const td = document.createElement("td");
-      td.innerText = state[i].text;
-      if (state[i].marked) td.classList.add("marked");
-      td.onclick = () => {
-        td.classList.toggle("marked");
-        saveBoard();
-      };
-      tr.appendChild(td);
+function loadFromHash() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  try {
+    const selected = JSON.parse(hash);
+    if (Array.isArray(selected) && selected.length === 24) {
+      renderCard(selected);
+      loadMarks();
+    } else {
+      generateNewCard();
     }
-    board.appendChild(tr);
+  } catch {
+    generateNewCard();
   }
 }
 
-window.onload = loadBoard;
+function copyCardLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert("Card link copied! Save or share it to return to your card.");
+  });
+}
+
+window.onload = loadFromHash;
 </script>
-
 </body>
 </html>
