@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>90s Bingo!</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #fefefe;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+    td {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #333;
+      vertical-align: middle;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      background-color: white;
+      user-select: none;
+    }
+    td.marked {
+      background-color: #90ee90;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body>
+
+<h1>90s Bingo!</h1>
+<button onclick="generateBingoCard()">🎲 New Card</button>
+<table id="bingo-board"></table>
+
+<script>
+const phrases = [
+  "Ninja Turtles", "Clueless", "Rad", "Tamagotchi", "Spice Girls", "Beepers", "Grunge",
+  "Titanic", "Blockbuster", "Furby", "Beanie Babies", "The Rachel", "Discman", "Boy Bands",
+  "AIM", "Y2K", "Game Boy", "Pogs", "Fresh Prince", "Frosted Tips", "Napster", "TRL",
+  "Butterfly Clips", "No Doubt", "Goosebumps", "SNICK", "Dial-up", "Saved by the Bell",
+  "Lisa Frank", "Rugrats", "Flannel", "Troll Dolls", "My So-Called Life", "VHS", "WWF",
+  "Pokémon", "Mini Backpacks", "Gak", "MTV", "Clarissa", "Daria", "Skorts", "TLC", "N64",
+  "Hypercolor", "Hacky Sack", "Nirvana", "T9 Texting", "Double Dare", "Power Rangers"
+];
+
+function shuffle(arr) {
+  let shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function generateBingoCard() {
+  localStorage.clear(); // Start fresh
+  const board = document.getElementById("bingo-board");
+  board.innerHTML = "";
+  let selected = shuffle(phrases).slice(0, 24);
+
+  let index = 0;
+  for (let row = 0; row < 5; row++) {
+    const tr = document.createElement("tr");
+    for (let col = 0; col < 5; col++) {
+      const td = document.createElement("td");
+      let cellIndex = row * 5 + col;
+      if (row === 2 && col === 2) {
+        td.innerText = "FREE";
+        td.classList.add("marked");
+      } else {
+        td.innerText = selected[index];
+        index++;
+      }
+
+      td.onclick = () => {
+        td.classList.toggle("marked");
+        saveBoard();
+      };
+
+      tr.appendChild(td);
+    }
+    board.appendChild(tr);
+  }
+
+  saveBoard(); // Save new board
+}
+
+function saveBoard() {
+  const cells = document.querySelectorAll("#bingo-board td");
+  const state = Array.from(cells).map(td => ({
+    text: td.innerText,
+    marked: td.classList.contains("marked")
+  }));
+  localStorage.setItem("bingoState", JSON.stringify(state));
+}
+
+function loadBoard() {
+  const saved = localStorage.getItem("bingoState");
+  if (!saved) {
+    generateBingoCard();
+    return;
+  }
+
+  const board = document.getElementById("bingo-board");
+  board.innerHTML = "";
+  const state = JSON.parse(saved);
+
+  for (let row = 0; row < 5; row++) {
+    const tr = document.createElement("tr");
+    for (let col = 0; col < 5; col++) {
+      const i = row * 5 + col;
+      const td = document.createElement("td");
+      td.innerText = state[i].text;
+      if (state[i].marked) td.classList.add("marked");
+      td.onclick = () => {
+        td.classList.toggle("marked");
+        saveBoard();
+      };
+      tr.appendChild(td);
+    }
+    board.appendChild(tr);
+  }
+}
+
+window.onload = loadBoard;
+</script>
+
+</body>
+</html>
