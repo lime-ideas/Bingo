@@ -137,10 +137,16 @@
         }
 
         function generateAndRedirect() {
-            const cardWords = generateCard();
-            const prefilledUrl = `https://docs.google.com/forms/d/e/<span class="math-inline">\{googleFormId\}/viewform?usp\=pp\_url&</span>{bingoWordsEntryId}=${encodeURIComponent(cardWords.join(', '))}`;
-            window.location.href = prefilledUrl;
-        }
+    const cardWords = generateCard();
+    renderCard(cardWords); // Render the card *before* redirecting
+
+    // Generate a hash and update the URL
+    const encoded = encodeURIComponent(JSON.stringify(cardWords));
+    window.location.hash = encoded;
+
+    const prefilledUrl = `https://docs.google.com/forms/d/e/${googleFormId}/viewform?usp=pp_url&${bingoWordsEntryId}=${encodeURIComponent(cardWords.join(', '))}`;
+    window.location.href = prefilledUrl; // *Then* redirect
+}
 
         window.onload = loadCardFromHash;
     </script>
