@@ -39,12 +39,15 @@
         .bingo-card .free {
             background-color: lightgray;
         }
+
+        .bingo-title {
+            font-weight: bold;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>Four 90s Bingo Cards</h1>
-    <div class="card-container" id="cardDisplay">
-        </div>
+    <div class="card-container" id="cardDisplay"></div>
 
     <script>
         const phrases = [
@@ -91,16 +94,16 @@
         }
 
         const cardDisplay = document.getElementById("cardDisplay");
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 2; i++) {
             const cardWords = generateCard();
             const cardDiv = document.createElement("div");
             cardDiv.classList.add("bingo-card");
-            const title = document.createElement("h3");
-            title.innerText = `Card ${i + 1}`;
+            const title = document.createElement("div");
+            title.classList.add("bingo-title");
+            title.innerText = "90s Bingo";
             cardDiv.appendChild(title);
             renderCard(cardWords, cardDiv);
             cardDisplay.appendChild(cardDiv);
         }
     </script>
-</body>
-</html>
+</
